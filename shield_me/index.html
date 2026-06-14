@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield Me | شيلد مي</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+</head>
+
+<body>
+    <div id="particles-js"></div>
+
+    <!-- navbar -->
+    <nav class="navbar">
+        <div class="logo">SHIELD<span>ME</span></div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showPage('home')">الرئيسية</a></li>
+            <li><a href="#" onclick="showPage('quiz')">الاختبار</a></li>
+            <li><a href="#" onclick="showPage('about')">من نحن</a></li>
+
+            <li id="login-item-nav">
+                <a href="#" onclick="showPage('login')" class="btn-login-nav">دخول</a>
+            </li>
+
+            <li id="logout-item-nav" style="display: none;">
+                <a href="#" onclick="handleLogout()" style="color: #ff4b2b;">خروج 🚪</a>
+            </li>
+        </ul>
+    </nav>
+    <!-- navbar -->
+
+    <!-- home section -->
+    <main id="main-content">
+        <section id="home" class="page active">
+            <div class="chat-wrapper">
+                <div class="chat-header">فاحص الأمان الذكي</div>
+                <div id="chat-box" class="chat-box">
+                    <div class="ai-msg">كيف يمكنني مساعدتك اليوم؟
+                    </div>
+                </div>
+                <div class="input-area">
+                    <div id="loader" class="loader"></div>
+                    <input type="file" id="file-input" style="display: none;" onchange="updateFileName()" hidden multiple>>
+    
+                    <label for="file-input" class="attach-btn" id="attach-label">📎</label>
+                    <input type="text" id="user-input" placeholder="اكتب سؤالك أو ضع رابطاً هنا...">
+                    <button id="send-btn" onclick="sendMessage()">إرسال</button>
+                </div>
+            </div>
+        </section>
+        <!-- home section -->
+        <!-- about us -->
+        <section id="about" class="page">
+            <div class="container">
+                <h2 class="section-title">عن منصة <span>Shield Me</span></h2>
+
+                <p class="about-description">
+                    Shield Me هي منصة أمنية متكاملة تعتمد على الذكاء الاصطناعي لحمايتك من التهديدات الرقمية، من خلال
+                    تحليل الروابط واكتشاف محاولات الاحتيال بدقة عالية.
+                </p>
+
+                <div class="about-grid">
+                    <div class="info-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">🛡️</div>
+                        <h3>رؤيتنا</h3>
+                        <p>تمكين المستخدمين من اكتشاف الهجمات السيبرانية قبل وقوعها باستخدام تقنيات تعلم الآلة المتطورة.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">🤖</div>
+                        <h3>تقنياتنا</h3>
+                        <p>نعتمد على محرك ذكاء اصطناعي يحلل البيانات الضخمة لاكتشاف برمجيات الفدية وثغرات الويب.</p>
+                        <div class="tech-tags">
+                            <span>AI Model</span>
+                            <span>Big Data</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">🎯</div>
+                        <h3>أهدافنا</h3>
+                        <p>خلق فضاء رقمي آمن وتقليل ضحايا الاختراق من خلال الفحص الفوري والتوعية الأمنية المستمرة.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- about us -->
+
+    </main>
+    <!-- quiz page -->
+    <section id="quiz" class="page">
+        <div class="quiz-container glass-card">
+            <div class="quiz-header">
+                <h2 id="question-text">جاري تحميل السؤال...</h2>
+                <div class="progress-bar">
+                    <div id="progress" class="progress"></div>
+                </div>
+            </div>
+            <div id="options-container" class="options-grid">
+            </div>
+            <div id="quiz-feedback" class="feedback"></div>
+            <div class="quiz-footer">
+                <span id="question-number">السؤال 1 من 5</span>
+            </div>
+        </div>
+    </section>
+    <!-- quiz page -->
+
+
+    <!-- login -->
+    <section id="login" class="page">
+        <div class="auth-wrapper">
+            <div id="login-form" class="auth-card">
+                <div class="auth-icon">🔒</div>
+                <h2>دخول المحترفين</h2>
+
+                <div class="input-group">
+                    <input type="email" id="login-email" placeholder=" " required>
+                    <label>البريد الإلكتروني</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="login-password" placeholder=" " required>
+                    <label>كلمة المرور</label>
+                </div>
+
+                <button class="auth-btn" onclick="handleLogin()">دخول آمن</button>
+
+                <div class="auth-divider"><span>أو</span></div>
+
+                <button onclick="handleGoogleLogin()" class="google-btn">
+                    <span>المتابعة باستخدام Google</span>
+                    <!-- <img src="./img/pngegg.png" alt="Google"> -->
+                </button>
+
+                <p>مستخدم جديد؟ <a href="#" onclick="toggleAuth()">إنشاء حساب</a></p>
+            </div>
+
+            <div id="register-form" class="auth-card" style="display: none;">
+                <div class="auth-icon">🛡️</div>
+                <h2>إنشاء حساب أمني</h2>
+                <div class="input-group">
+                    <input type="text" id="reg-name" placeholder=" " required>
+                    <label>الاسم بالكامل</label>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="reg-email" placeholder=" " required>
+                    <label>البريد الإلكتروني</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="reg-password" placeholder=" " required>
+                    <label>كلمة المرور</label>
+                </div>
+                <button class="auth-btn register" onclick="handleRegister()">تسجيل الآن</button>
+                <p>لديك حساب بالفعل؟ <a href="#" onclick="toggleAuth()">سجل دخولك</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- loading page -->
+    <div id="global-loader" class="page-loader">
+        <div class="loader-inner-content">
+            <div class="ring-system">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="lock-icon">🔒</div>
+            </div>
+
+            <div class="loader-status-area">
+                <h3 class="glitch-title">SYSTEM ACCESS</h3>
+                <div class="progress-container">
+                    <div class="progress-fill" id="fill-bar"></div>
+                </div>
+                <p class="auth-msg">DECRYPTING PROTOCOLS... <span id="pc-count">0</span>%</p>
+            </div>
+        </div>
+    </div>
+    <!-- loading page -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            sendEmailVerification,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAw-QQhOWR_cZWDZDkeQHcUCigMw9FWThI",
+            authDomain: "shieldme-11537.firebaseapp.com",
+            projectId: "shieldme-11537",
+            storageBucket: "shieldme-11537.firebasestorage.app",
+            messagingSenderId: "243822581743",
+            appId: "1:243822581743:web:99809977f753add644881a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // --- دالة عرض الإشعارات الجانبية (Toast) ---
+        const showToast = (title, icon = 'success', timer = 3000) => {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: icon,
+                title: title,
+                showConfirmButton: false,
+                timer: timer,
+                timerProgressBar: true,
+                background: '#0d1117', // متناسق مع لون الكارت عندك
+                color: '#fff',
+                iconColor: icon === 'success' ? '#00e5ff' : (icon === 'error' ? '#ff3d00' : '#ffa500')
+            });
+        };
+
+        // --- مراقبة حالة المستخدم ---
+        onAuthStateChanged(auth, (user) => {
+            const loginItem = document.getElementById('login-item-nav');
+            const logoutItem = document.getElementById('logout-item-nav');
+
+            if (user && user.emailVerified) {
+                if (loginItem) loginItem.style.display = "none";
+                if (logoutItem) logoutItem.style.display = "block";
+                showPage('home');
+            } else {
+                if (loginItem) loginItem.style.display = "block";
+                if (logoutItem) logoutItem.style.display = "none";
+            }
+        });
+
+        // --- دالة الدخول بجوجل ---
+        window.handleGoogleLogin = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                showToast(`أهلاً بك، ${result.user.displayName}`);
+                showPage('home');
+            } catch (error) {
+                console.error("Google Auth Error:", error);
+                showToast("فشل الدخول بجوجل", "error");
+            }
+        };
+
+        // --- دالة التسجيل بالإيميل ---
+        window.handleRegister = async () => {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            if (!email || !password) {
+                return showToast("اكمل البيانات أولاً!", "warning");
+            }
+
+            try {
+                // 1. إنشاء الحساب
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+                // 2. إرسال إيميل التحقق
+                try {
+                    await sendEmailVerification(userCredential.user);
+                    showToast("تم التسجيل! ارجع لبريدك لتفعيل الحساب", "success", 6000);
+                } catch (verificationError) {
+                    console.error("Verification Error:", verificationError);
+                    showToast("تم إنشاء الحساب، لكن فشل إرسال بريد التفعيل. حاول تسجيل الدخول لاحقاً", "info");
+                }
+
+                // 3. تسجيل الخروج فوراً
+                await auth.signOut();
+                showPage('login');
+
+            } catch (error) {
+                console.error("Registration Error:", error.code);
+
+                let errorMessage = "حدث خطأ أثناء التسجيل";
+                if (error.code === 'auth/weak-password') {
+                    errorMessage = "كلمة المرور ضعيفة (6 أحرف على الأقل)";
+                } else if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "هذا البريد مسجل بالفعل";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = "صيغة البريد غير صحيحة";
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage = "تأكد من اتصالك بالإنترنت";
+                }
+
+                showToast(errorMessage, "error", 5000);
+            }
+        };
+        // --- دالة الدخول بالإيميل ---
+        window.handleLogin = async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                return showToast("أدخل البريد وكلمة السر", "warning");
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                if (user.emailVerified) {
+                    showToast("تم تسجيل الدخول بنجاح");
+                    showPage('home');
+                } else {
+                    // محاولة إعادة إرسال إيميل التفعيل لو فشل قبل كدة
+                    try {
+                        await sendEmailVerification(user);
+                        showToast("إيميلك مش مفعل. بعتنا لك رابط جديد، شيك على بريدك", "warning", 6000);
+                    } catch (e) {
+                        showToast("البريد غير مفعل، وفشل إرسال رابط جديد حالياً", "error");
+                    }
+                    await auth.signOut();
+                }
+            } catch (error) {
+                showToast("البريد أو كلمة السر خطأ", "error");
+            }
+        };
+
+        // --- دالة الخروج ---
+        window.handleLogout = async () => {
+            try {
+                await signOut(auth);
+                showToast("خرجت بأمان");
+                showPage('login');
+            } catch (error) {
+                showToast("فشل عملية الخروج", "error");
+            }
+        };
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>
