@@ -42,6 +42,45 @@ async function sendMessage() {
         }
         chatBox.innerHTML += `<div class="message user-message">📁 فحص الملفات: <strong>${fileNames.join(', ')}</strong></div>`;
     }
+    async function checkEmailFromFrontend(userEmailText) {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/predict_email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: userEmailText }) // Sends the text to app.py
+        });
+
+        const result = await response.json();
+        
+        // This is the direct output from your joblib model!
+        console.log("Prediction Result:", result); 
+        
+        // Example: Update your UI text with the result
+        document.getElementById("result-box").innerText = `Result: ${result.prediction}`;
+
+    } catch (error) {
+        console.error("Could not connect to the Flask backend:", error);
+    }
+}
+async function checkUrlFromFrontend(userUrl) {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/predict_url', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url: userUrl })
+        });
+
+        const result = await response.json();
+        console.log("URL Prediction Result:", result);
+        
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -276,3 +315,9 @@ particlesJS("particles-js", {
         pcCount.innerText = p;
     }, 100);
 }
+document.getElementById('user-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevents adding an accidental new line or reloading the page
+        sendMessage();          // Triggers your existing send function
+    }
+});
