@@ -34,10 +34,13 @@ def predict_url(url):
     feats = extract_features(url)
     df = pd.DataFrame([feats]).reindex(columns=url_columns, fill_value=0)
     result = url_model.predict(df)[0]
+    proba = url_model.predict_proba(df)[0]
+    confidence = round(float(max(proba)) * 100, 2)
 
     if result == 1:
         return {
             "classification": "Unsafe",
+            "confidence": f"{confidence}%",
             "risk_level": "High",
             "details": "This URL contains characteristics commonly found in malicious links",
             "tips": [
@@ -49,6 +52,7 @@ def predict_url(url):
     else:
         return {
             "classification": "Safe",
+            "confidence": f"{confidence}%",
             "risk_level": "Low",
             "details": "No significant threats were detected in this URL",
             "tips": ["Always verify links before clicking", "Continue following normal cybersecurity practices"]
