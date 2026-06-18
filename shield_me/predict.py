@@ -1,16 +1,21 @@
-import joblib
+import pickle
 import os
 import warnings
 warnings.filterwarnings("ignore")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-model = joblib.load(os.path.join(BASE_DIR, "model (1).pkl"))
-vectorizer = joblib.load(os.path.join(BASE_DIR, "vectorizer (1).pkl"))
+with open(os.path.join(BASE_DIR, "stacking_model.pkl"), "rb") as f:
+    model = pickle.load(f)
+
+with open(os.path.join(BASE_DIR, "tfidf_vectorizer.pkl"), "rb") as f:
+    vectorizer = pickle.load(f)
 
 def predict_email(email_text):
     email_vector = vectorizer.transform([email_text])
     result = model.predict(email_vector)
+    proba = model.predict_proba(email_vector)[0]
+    confidence = round(float(max(proba)) * 100, 2)
 
     if result[0] == 1:
         classification = "Spam"
@@ -55,6 +60,7 @@ def predict_email(email_text):
 
         return {
             "classification": classification,
+            "confidence": f"{confidence}%",
             "risk_level": risk_level,
             "threat_type": threat_type,
             "details": details,
@@ -64,6 +70,7 @@ def predict_email(email_text):
     else:
         return {
             "classification": "Safe",
+            "confidence": f"{confidence}%",
             "risk_level": "Low",
             "details": "No significant spam indicators were detected",
             "tips": ["Continue following normal cybersecurity practices", "Always verify unexpected requests"]
