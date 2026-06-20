@@ -142,7 +142,15 @@ def url_route():
     url = data.get('url', '')
     result = url_predictor(url)
     return jsonify(result)
-
+@app.route('/chat', methods=['POST'])
+def chat_route():
+    from chatbot import casual_chat
+    data = request.get_json()
+    message = data.get('message', '')
+    if not message:
+        return jsonify({'reply': 'لم يتم إرسال أي رسالة.'})
+    response = casual_chat(message)
+    return jsonify({'reply': response})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

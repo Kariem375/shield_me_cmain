@@ -4,167 +4,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#010313">
     <title>Shield Me | شيلد مي</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2300e5ff' d='M32 4 10 12v17c0 14 9.5 26.2 22 31 12.5-4.8 22-17 22-31V12L32 4Z'/%3E%3Cpath fill='%23010313' d='M29 40 18 29l5-5 6 6 13-14 5 5-18 19Z'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        window.SHIELDME_API_URL = "http://127.0.0.1:5000";
+        // Frontend/Firebase only mode: لا يحاول الاتصال بالباك إند أثناء تجربة الواجهة فقط.
+        // اجعلها false عند تشغيل app.py واختبار الفحص الحقيقي.
+        window.SHIELDME_FRONTEND_ONLY = false;
+    </script>
 </head>
 
 <body>
-    <div id="particles-js"></div>
+    <div id="particles-js" aria-hidden="true"></div>
 
-    <!-- navbar -->
     <nav class="navbar">
-        <div class="logo">SHIELD<span>ME</span></div>
-        <ul class="nav-links">
+        <div class="logo">
+    <img src="img/logo.png" alt="ShieldMe" /></div>
+        <ul class="nav-links" id="nav-links">
             <li><a href="#" onclick="showPage('home')">الرئيسية</a></li>
             <li><a href="#" onclick="showPage('quiz')">الاختبار</a></li>
             <li><a href="#" onclick="showPage('about')">من نحن</a></li>
-
-            <li id="login-item-nav">
-                <a href="#" onclick="showPage('login')" class="btn-login-nav">دخول</a>
-            </li>
-
-            <li id="logout-item-nav" style="display: none;">
-                <a href="#" onclick="handleLogout()" style="color: #ff4b2b;">خروج 🚪</a>
-            </li>
+            <li id="history-item-nav"><a href="#" onclick="showPage('history')">سجل الفحص</a></li>
+            <li id="login-item-nav"><a href="#" onclick="showPage('login')" class="btn-login-nav">دخول Google</a></li>
+            <li id="logout-item-nav" style="display: none;"><a href="#" onclick="handleLogout()" class="logout-link">خروج 🚪</a></li>
         </ul>
+        <button class="menu-toggle" type="button" aria-label="فتح القائمة" onclick="toggleMobileMenu()">☰</button>
     </nav>
-    <!-- navbar -->
 
-    <!-- home section -->
     <main id="main-content">
         <section id="home" class="page active">
             <div class="chat-wrapper">
-                <div class="chat-header">فاحص الأمان الذكي</div>
-                <div id="chat-box" class="chat-box">
-                    <div class="ai-msg">كيف يمكنني مساعدتك اليوم؟
+                <div class="chat-header">
+                    <div>
+                        <strong>فاحص الأمان الذكي</strong>
+                        <small>اكتب رسالة عادية أو أرسل رابطًا/ملفًا للفحص</small>
                     </div>
                 </div>
-                <div class="input-area">
-                    <div id="loader" class="loader"></div>
-                    <input type="file" id="file-input" style="display: none;" onchange="updateFileName()" hidden multiple>>
-    
-                    <label for="file-input" class="attach-btn" id="attach-label">📎</label>
-                    <input type="text" id="user-input" placeholder="اكتب سؤالك أو ضع رابطاً هنا...">
-                    <button id="send-btn" onclick="sendMessage()">إرسال</button>
+
+                <div id="chat-box" class="chat-box" aria-live="polite">
+                    <div class="ai-msg">مرحبًا بك 👋 اكتب سؤالك أو أرسل رابطًا/ملفًا للفحص.</div>
                 </div>
+
+                <form class="input-area" id="chat-form" onsubmit="sendMessage(event)">
+                    <div id="loader" class="loader" aria-hidden="true"></div>
+                    <input type="file" id="file-input" class="visually-hidden" onchange="updateFileName()" multiple>
+                    <label for="file-input" class="attach-btn" id="attach-label" title="إرفاق ملفات">
+                        <span class="attach-icon">📎</span>
+                        <span class="attach-badge" id="attach-count" hidden>0</span>
+                    </label>
+                    <input type="text" id="user-input" placeholder="اكتب رسالة أو ضع رابطًا هنا..." autocomplete="off">
+                    <button id="send-btn" type="submit">إرسال</button>
+                </form>
+                <div class="input-hint" id="file-hint">لا توجد ملفات مرفقة</div>
             </div>
         </section>
-        <!-- home section -->
-        <!-- about us -->
+
+        <section id="quiz" class="page">
+            <div class="quiz-container glass-card">
+                <div class="quiz-header">
+                    <h2 id="question-text">جاري تحميل السؤال...</h2>
+                    <div class="progress-bar">
+                        <div id="progress" class="progress"></div>
+                    </div>
+                </div>
+                <div id="options-container" class="options-grid"></div>
+                <div id="quiz-feedback" class="feedback"></div>
+                <div class="quiz-footer"><span id="question-number">السؤال 1 من 5</span></div>
+            </div>
+        </section>
+
         <section id="about" class="page">
             <div class="container">
                 <h2 class="section-title">عن منصة <span>Shield Me</span></h2>
-
                 <p class="about-description">
-                    Shield Me هي منصة أمنية متكاملة تعتمد على الذكاء الاصطناعي لحمايتك من التهديدات الرقمية، من خلال
-                    تحليل الروابط واكتشاف محاولات الاحتيال بدقة عالية.
+                    منصة توعوية وتفاعلية تساعد المستخدم على التعامل بحذر مع الملفات والروابط والرسائل المشبوهة، من خلال واجهة بسيطة وسهلة الاستخدام.
                 </p>
 
-                <div class="about-grid">
-                    <div class="info-card">
+                <div class="about-grid services-grid">
+                    <div class="info-card service-card scan-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">🔍</div>
+                        <h3>فحص الملفات</h3>
+                        <p>إرسال ملفات للفحص قبل فتحها، مع عرض نتيجة واضحة تساعد المستخدم على اتخاذ قرار آمن.</p>
+                    </div>
+                    <div class="info-card service-card link-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">🌐</div>
+                        <h3>تحليل الروابط</h3>
+                        <p>التعامل مع الروابط المشبوهة بحذر، واكتشاف مؤشرات الخداع قبل الضغط عليها.</p>
+                    </div>
+                    <div class="info-card service-card awareness-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">🎓</div>
+                        <h3>التوعية الأمنية</h3>
+                        <p>نصائح مبسطة تساعد المستخدم على فهم التصيد والاحتيال وحماية بياناته اليومية.</p>
+                    </div>
+                    <div class="info-card service-card quiz-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">🧠</div>
+                        <h3>اختبار تفاعلي</h3>
+                        <p>أسئلة قصيرة تقيس وعي المستخدم بأساسيات الأمن الرقمي بطريقة عملية وسريعة.</p>
+                    </div>
+                    <div class="info-card service-card account-card">
+                        <div class="card-glow"></div>
+                        <div class="icon-box">👤</div>
+                        <h3>حساب المستخدم</h3>
+                        <p>تسجيل دخول آمن يسمح بعرض سجل الفحوصات الخاص بكل مستخدم داخل نفس المتصفح.</p>
+                    </div>
+                    <div class="info-card service-card privacy-card">
                         <div class="card-glow"></div>
                         <div class="icon-box">🛡️</div>
-                        <h3>رؤيتنا</h3>
-                        <p>تمكين المستخدمين من اكتشاف الهجمات السيبرانية قبل وقوعها باستخدام تقنيات تعلم الآلة المتطورة.
-                        </p>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="card-glow"></div>
-                        <div class="icon-box">🤖</div>
-                        <h3>تقنياتنا</h3>
-                        <p>نعتمد على محرك ذكاء اصطناعي يحلل البيانات الضخمة لاكتشاف برمجيات الفدية وثغرات الويب.</p>
-                        <div class="tech-tags">
-                            <span>AI Model</span>
-                            <span>Big Data</span>
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="card-glow"></div>
-                        <div class="icon-box">🎯</div>
-                        <h3>أهدافنا</h3>
-                        <p>خلق فضاء رقمي آمن وتقليل ضحايا الاختراق من خلال الفحص الفوري والتوعية الأمنية المستمرة.</p>
+                        <h3>خصوصية أفضل</h3>
+                        <p>واجهة مصممة لعرض النتائج بوضوح دون تنفيذ الملفات أو إجبار المستخدم على فتح عناصر مشبوهة.</p>
                     </div>
                 </div>
             </div>
         </section>
-        <!-- about us -->
+
+        <section id="history" class="page">
+            <div class="history-wrapper glass-card">
+                <div class="history-head">
+                    <div>
+                        <h2>سجل الفحص</h2>
+                        <p>يمكن للجميع فتح هذه الصفحة، لكن حفظ وعرض عمليات الفحص الخاصة يتطلب تسجيل الدخول بحساب Google.</p>
+                    </div>
+                    <button type="button" class="clear-history-btn" onclick="clearHistory()">مسح السجل</button>
+                </div>
+                <div id="history-list" class="history-list"></div>
+                <div id="history-locked" class="history-locked" hidden>
+                    <div class="icon-box">🔒</div>
+                    <h3>سجل الفحص يحتاج تسجيل دخول</h3>
+                    <p>الصفحة متاحة للجميع، لكن حفظ وعرض السجل الشخصي يعمل فقط بعد تسجيل الدخول باستخدام Google.</p>
+                    <button type="button" class="main-btn" onclick="showPage('login')">الدخول باستخدام Google</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="login" class="page">
+            <div class="auth-wrapper google-only-wrapper">
+                <div id="login-form" class="auth-card google-only-card">
+                    <div class="auth-icon">🔒</div>
+                    <h2>تسجيل الدخول</h2>
+                    <p class="auth-note">للحفاظ على بساطة وأمان المنصة، تسجيل الدخول متاح باستخدام Google فقط.</p>
+                    <button type="button" onclick="handleGoogleLogin()" class="google-btn google-main-btn">
+                        <span class="google-mark">G</span>
+                        <span>المتابعة باستخدام Google</span>
+                    </button>
+                    <p class="auth-subnote">بعد تسجيل الدخول يمكنك حفظ وعرض سجل الفحص الخاص بك.</p>
+                </div>
+            </div>
+        </section>
 
     </main>
-    <!-- quiz page -->
-    <section id="quiz" class="page">
-        <div class="quiz-container glass-card">
-            <div class="quiz-header">
-                <h2 id="question-text">جاري تحميل السؤال...</h2>
-                <div class="progress-bar">
-                    <div id="progress" class="progress"></div>
-                </div>
-            </div>
-            <div id="options-container" class="options-grid">
-            </div>
-            <div id="quiz-feedback" class="feedback"></div>
-            <div class="quiz-footer">
-                <span id="question-number">السؤال 1 من 5</span>
-            </div>
-        </div>
-    </section>
-    <!-- quiz page -->
 
-
-    <!-- login -->
-    <section id="login" class="page">
-        <div class="auth-wrapper">
-            <div id="login-form" class="auth-card">
-                <div class="auth-icon">🔒</div>
-                <h2>دخول المحترفين</h2>
-
-                <div class="input-group">
-                    <input type="email" id="login-email" placeholder=" " required>
-                    <label>البريد الإلكتروني</label>
-                </div>
-
-                <div class="input-group">
-                    <input type="password" id="login-password" placeholder=" " required>
-                    <label>كلمة المرور</label>
-                </div>
-
-                <button class="auth-btn" onclick="handleLogin()">دخول آمن</button>
-
-                <div class="auth-divider"><span>أو</span></div>
-
-                <button onclick="handleGoogleLogin()" class="google-btn">
-                    <span>المتابعة باستخدام Google</span>
-                    <!-- <img src="./img/pngegg.png" alt="Google"> -->
-                </button>
-
-                <p>مستخدم جديد؟ <a href="#" onclick="toggleAuth()">إنشاء حساب</a></p>
-            </div>
-
-            <div id="register-form" class="auth-card" style="display: none;">
-                <div class="auth-icon">🛡️</div>
-                <h2>إنشاء حساب أمني</h2>
-                <div class="input-group">
-                    <input type="text" id="reg-name" placeholder=" " required>
-                    <label>الاسم بالكامل</label>
-                </div>
-                <div class="input-group">
-                    <input type="email" id="reg-email" placeholder=" " required>
-                    <label>البريد الإلكتروني</label>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="reg-password" placeholder=" " required>
-                    <label>كلمة المرور</label>
-                </div>
-                <button class="auth-btn register" onclick="handleRegister()">تسجيل الآن</button>
-                <p>لديك حساب بالفعل؟ <a href="#" onclick="toggleAuth()">سجل دخولك</a></p>
-            </div>
-        </div>
-    </section>
-
-    <!-- loading page -->
     <div id="global-loader" class="page-loader">
         <div class="loader-inner-content">
             <div class="ring-system">
@@ -173,25 +169,19 @@
                 <div class="ring"></div>
                 <div class="lock-icon">🔒</div>
             </div>
-
             <div class="loader-status-area">
                 <h3 class="glitch-title">SYSTEM ACCESS</h3>
-                <div class="progress-container">
-                    <div class="progress-fill" id="fill-bar"></div>
-                </div>
+                <div class="progress-container"><div class="progress-fill" id="fill-bar"></div></div>
                 <p class="auth-msg">DECRYPTING PROTOCOLS... <span id="pc-count">0</span>%</p>
             </div>
         </div>
     </div>
-    <!-- loading page -->
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import {
             getAuth,
-            createUserWithEmailAndPassword,
-            sendEmailVerification,
-            signInWithEmailAndPassword,
             signOut,
             onAuthStateChanged,
             GoogleAuthProvider,
@@ -210,135 +200,86 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
 
-        // --- دالة عرض الإشعارات الجانبية (Toast) ---
-        const showToast = (title, icon = 'success', timer = 3000) => {
+        window.currentShieldUser = null;
+
+        window.showToast = (title, icon = 'success', timer = 3000) => {
             Swal.fire({
                 toast: true,
                 position: 'top-end',
-                icon: icon,
-                title: title,
+                icon,
+                title,
                 showConfirmButton: false,
-                timer: timer,
+                timer,
                 timerProgressBar: true,
-                background: '#0d1117', // متناسق مع لون الكارت عندك
+                background: '#0d1117',
                 color: '#fff',
                 iconColor: icon === 'success' ? '#00e5ff' : (icon === 'error' ? '#ff3d00' : '#ffa500')
             });
         };
 
-        // --- مراقبة حالة المستخدم ---
+        const authErrorMessage = (error) => {
+            const code = error?.code || '';
+            const map = {
+                'auth/unauthorized-domain': 'الدومين الحالي غير مضاف في Firebase Authorized Domains. افتح الموقع من localhost وأضفه من إعدادات Firebase.',
+                                'auth/network-request-failed': 'تأكد من اتصالك بالإنترنت.',
+                'auth/too-many-requests': 'تم إيقاف الطلبات مؤقتًا بسبب محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى.',
+                'auth/user-disabled': 'تم تعطيل هذا الحساب من لوحة التحكم.'
+            };
+            return map[code] || 'تعذر تسجيل الدخول باستخدام Google. حاول مرة أخرى.';
+        };
+
         onAuthStateChanged(auth, (user) => {
             const loginItem = document.getElementById('login-item-nav');
             const logoutItem = document.getElementById('logout-item-nav');
 
-            if (user && user.emailVerified) {
-                if (loginItem) loginItem.style.display = "none";
-                if (logoutItem) logoutItem.style.display = "block";
-                showPage('home');
+            if (user) {
+                window.currentShieldUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email,
+                    photoURL: user.photoURL || null
+                };
+                if (loginItem) loginItem.style.display = 'none';
+                if (logoutItem) logoutItem.style.display = 'block';
             } else {
-                if (loginItem) loginItem.style.display = "block";
-                if (logoutItem) logoutItem.style.display = "none";
+                window.currentShieldUser = null;
+                if (loginItem) loginItem.style.display = 'block';
+                if (logoutItem) logoutItem.style.display = 'none';
             }
+
+            window.dispatchEvent(new CustomEvent('shield-auth-changed', { detail: window.currentShieldUser }));
         });
 
-        // --- دالة الدخول بجوجل ---
+        // نستخدم Popup في التشغيل المحلي لأنه أكثر ثباتًا مع http://localhost:5500.
+        // قد يظهر تحذير Cross-Origin-Opener-Policy في Console، لكنه لا يمنع تسجيل الدخول إذا تمت العملية.
         window.handleGoogleLogin = async () => {
+            if (location.protocol === 'file:') {
+                return showToast('افتح الموقع من http://localhost:5500 وليس من ملف مباشر.', 'warning', 6000);
+            }
             try {
                 const result = await signInWithPopup(auth, provider);
-                showToast(`أهلاً بك، ${result.user.displayName}`);
+                showToast(`أهلاً بك، ${result.user.displayName || result.user.email}`);
                 showPage('home');
             } catch (error) {
-                console.error("Google Auth Error:", error);
-                showToast("فشل الدخول بجوجل", "error");
+                console.warn('Google Auth Error:', error?.code || error);
+                showToast(authErrorMessage(error), 'error', 7000);
             }
         };
 
-        // --- دالة التسجيل بالإيميل ---
-        window.handleRegister = async () => {
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-
-            if (!email || !password) {
-                return showToast("اكمل البيانات أولاً!", "warning");
-            }
-
-            try {
-                // 1. إنشاء الحساب
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-                // 2. إرسال إيميل التحقق
-                try {
-                    await sendEmailVerification(userCredential.user);
-                    showToast("تم التسجيل! ارجع لبريدك لتفعيل الحساب", "success", 6000);
-                } catch (verificationError) {
-                    console.error("Verification Error:", verificationError);
-                    showToast("تم إنشاء الحساب، لكن فشل إرسال بريد التفعيل. حاول تسجيل الدخول لاحقاً", "info");
-                }
-
-                // 3. تسجيل الخروج فوراً
-                await auth.signOut();
-                showPage('login');
-
-            } catch (error) {
-                console.error("Registration Error:", error.code);
-
-                let errorMessage = "حدث خطأ أثناء التسجيل";
-                if (error.code === 'auth/weak-password') {
-                    errorMessage = "كلمة المرور ضعيفة (6 أحرف على الأقل)";
-                } else if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = "هذا البريد مسجل بالفعل";
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = "صيغة البريد غير صحيحة";
-                } else if (error.code === 'auth/network-request-failed') {
-                    errorMessage = "تأكد من اتصالك بالإنترنت";
-                }
-
-                showToast(errorMessage, "error", 5000);
-            }
-        };
-        // --- دالة الدخول بالإيميل ---
-        window.handleLogin = async () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            if (!email || !password) {
-                return showToast("أدخل البريد وكلمة السر", "warning");
-            }
-
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                if (user.emailVerified) {
-                    showToast("تم تسجيل الدخول بنجاح");
-                    showPage('home');
-                } else {
-                    // محاولة إعادة إرسال إيميل التفعيل لو فشل قبل كدة
-                    try {
-                        await sendEmailVerification(user);
-                        showToast("إيميلك مش مفعل. بعتنا لك رابط جديد، شيك على بريدك", "warning", 6000);
-                    } catch (e) {
-                        showToast("البريد غير مفعل، وفشل إرسال رابط جديد حالياً", "error");
-                    }
-                    await auth.signOut();
-                }
-            } catch (error) {
-                showToast("البريد أو كلمة السر خطأ", "error");
-            }
-        };
-
-        // --- دالة الخروج ---
         window.handleLogout = async () => {
             try {
                 await signOut(auth);
-                showToast("خرجت بأمان");
+                showToast('خرجت بأمان.');
                 showPage('login');
             } catch (error) {
-                showToast("فشل عملية الخروج", "error");
+                console.error('Logout Error:', error);
+                showToast('فشل تسجيل الخروج.', 'error');
             }
         };
     </script>
+
     <script src="script.js"></script>
 </body>
 
