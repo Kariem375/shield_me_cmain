@@ -6,6 +6,8 @@ import os
 import pandas as pd
 from predict import predict_email
 from url_predict import predict_url as url_predictor
+from chatbot import chat as gemini_chat
+import markdown
 
 app = Flask(__name__)
 CORS(app)  # Allows your script.js frontend to communicate safely
@@ -57,27 +59,41 @@ def scan():
 
     reply_message = ""
 
-    # PART A: Check text inputs (URLs or Email Text) using local ML Models
+# PART A: Check text inputs (URLs or Email Text) using local ML Models
     if user_text:
-        # Simple detection: if it contains http, www, or a domain dot, treat it as a URL
-        if user_text.startswith(('http://', 'https://')) or 'www.' in user_text or ('.' in user_text and '/' in user_text):
+        if user_text.startswith(('http://', 'https://')) or 'www.' in user_text:
             url_res = url_predictor(user_text)
-            reply_message += f"🌐 <strong>URL Analysis ({user_text}):</strong><br>"
+            reply_message += f"🌐 <strong>تحليل الرابط الإلكتروني ({user_text}):</strong><br>"
             if url_res['classification'] == 'Unsafe':
-                reply_message += f"<span style='color: #ff4b2b;'>⚠️ Flagged as UNSAFE ({url_res['risk_level']} Risk)</span><br>"
-                reply_message += f"&nbsp;&nbsp;➔ {url_res['details']}<br><br>"
+                risk = "عالي جداً" if url_res['risk_level'] == 'High' else url_res['risk_level']
+                reply_message += f"<span style='color: #ff4b2b;'>⚠️ تم تصنيفه كـ غيـر آمـن (مستوى الخطورة: {risk})</span><br><br>"
             else:
-                reply_message += f"<span style='color: #00e5ff;'>✅ URL is Clean and Safe.</span><br><br>"
+                reply_message += f"<span style='color: #00e5ff;'>✅ الرابط نظيف وآمن تماماً للاستخدام.</span><br><br>"
         else:
-            # Otherwise, treat it as text/email analysis
             email_res = predict_email(user_text)
-            reply_message += f"📧 <strong>Text/Email Analysis:</strong><br>"
+            reply_message += f"📧 <strong>تحليل محتوى النص / البريد الإلكتروني:</strong><br>"
             if email_res['classification'] == 'Spam':
-                reply_message += f"<span style='color: #ff4b2b;'>⚠️ Flagged as SPAM ({email_res['risk_level']} Risk)</span><br>"
-                reply_message += f"&nbsp;&nbsp;➔ Type: {email_res.get('threat_type', 'Suspicious Content')}<br>"
-                reply_message += f"&nbsp;&nbsp;➔ {email_res['details']}<br><br>"
+                risk = "عالي" if email_res['risk_level'] == 'High' else email_res['risk_level']
+                reply_message += f"<span style='color: #ff4b2b;'>⚠️ تم تصنيفه كـ بريد احتيالي / مزعج (مستوى الخطورة: {risk})</span><br><br>"
             else:
-                reply_message += f"<span style='color: #00e5ff;'>✅ Text contents appear safe.</span><br><br>"
+                reply_message += f"<span style='color: #00e5ff;'>✅ محتوى النص يبدو آمناً ولا توجد به مؤشرات احتيال قوية.</span><br><br>"
+
+        # ==========================================
+        # 🤖 GEMINI AI INTEGRATION (ARABIC OUTPUT)
+        # ==========================================
+        ai_response = gemini_chat(user_text)
+        html_ai_response = markdown.markdown(ai_response)
+        
+        reply_message += f"""
+        <div style="background-color: rgba(255, 255, 255, 0.04); padding: 18px; border-radius: 8px; margin-top: 15px; border-right: 4px solid #00e5ff; text-align: right; direction: rtl; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="color: #00e5ff; font-weight: bold; margin-bottom: 12px; font-size: 1.15em;">
+                🤖 تحليل مستشار الذكاء الاصطناعي (Shield Me AI):
+            </div>
+            <div style='color: #e3e3e3; font-size: 14.5px; line-height: 1.8;'>
+                {html_ai_response}
+            </div>
+        </div><br>
+        """
 
     # PART B: Check uploaded files using YARA Engine
     if uploaded_files and rules:
