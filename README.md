@@ -227,10 +227,11 @@ Built by students of the Faculty of Computers and Information as a graduation pr
 
 | Name | Role |
 |---|---|
-| [Team Member 1] | Backend & ML Engineering |
-| [Team Member 2] | Frontend Development |
-| [Team Member 3] | Cybersecurity & YARA Rules |
-| [Team Member 4] | AI Integration & Documentation |
+| Mohammed Hassan | Backend & ML Engineering |
+| Ahmed Mansor | Frontend Development |
+| Kariem Ehab | Cybersecurity & YARA Rules |
+| Ebrahim Salah | ML Engineering |
+| Mohammed Tarek | AI Integration |
 
 **Supervised by:** Dr. Eman Nassar
 
