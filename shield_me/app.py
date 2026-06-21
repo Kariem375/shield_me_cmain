@@ -10,13 +10,10 @@ from chatbot import chat as gemini_chat
 import markdown
 
 app = Flask(__name__)
-CORS(app)  # Allows your script.js frontend to communicate safely
-
+CORS(app)  
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ==========================================
-# 1. LOAD YARA RULES (FOR FILE SCANNING)
-# ==========================================
+# YARA rules
 try:
     rules = yara.compile(filepath=os.path.join(BASE_DIR, 'rules.yar'))
     print("✅ YARA rules loaded successfully!")
@@ -24,7 +21,7 @@ except Exception as e:
     print(f"❌ Error loading YARA rules: {e}")
     rules = None
 
-# Threat dictionary mapping for YARA rules
+# Threat descriptions
 threat_descriptions = {
     "Test_Malware_Rule": "تم اكتشاف ملف اختبار. محرك الحماية يعمل بكفاءة.",
     "Suspicious_PDF_With_JS": "ملف PDF خبيث! يحتوي على أكواد جافا سكريبت مخفية للعمل تلقائياً.",
@@ -36,9 +33,7 @@ threat_descriptions = {
     "Hidden_PowerShell_Execution": "ملف سكربت خطير يحاول تشغيل أوامر PowerShell مخفية لتخطي الحماية."
 }
 
-# ==========================================
-# 2. LOAD LOCAL ML MODELS (FOR EMAIL & URL)
-# ==========================================
+# ML models
 try:
     email_model = joblib.load(os.path.join(BASE_DIR, 'model (1).pkl'))
     vectorizer = joblib.load(os.path.join(BASE_DIR, 'vectorizer (1).pkl'))
@@ -48,10 +43,6 @@ try:
 except Exception as e:
     print(f"❌ Error loading ML models: {e}")
 
-# ==========================================
-# 3. UNIFIED SCAN ROUTE
-# ==========================================
-
 @app.route('/scan', methods=['POST'])
 def scan():
     user_text = request.form.get('text', '').strip()
@@ -59,7 +50,7 @@ def scan():
 
     reply_message = ""
 
-# PART A: Check text inputs (URLs or Email Text) using local ML Models
+# Text / URL scan
     if user_text:
         if user_text.startswith(('http://', 'https://')) or 'www.' in user_text:
             url_res = url_predictor(user_text)
@@ -78,9 +69,7 @@ def scan():
             else:
                 reply_message += f"<span style='color: #00e5ff;'>✅ محتوى النص يبدو آمناً ولا توجد به مؤشرات احتيال قوية.</span><br><br>"
 
-        # ==========================================
-        # 🤖 GEMINI AI INTEGRATION (ARABIC OUTPUT)
-        # ==========================================
+        # Gemini explanation
         ai_response = gemini_chat(user_text)
         html_ai_response = markdown.markdown(ai_response)
         
@@ -95,7 +84,7 @@ def scan():
         </div><br>
         """
 
-    # PART B: Check uploaded files using YARA Engine
+    # File scan
     if uploaded_files and rules:
         has_valid_files = False
         for uploaded_file in uploaded_files:
@@ -120,14 +109,13 @@ def scan():
     elif uploaded_files and not rules:
         reply_message += "⚠️ Files received but YARA scanner engine is offline.<br>"
 
-    # Fallback if everything was empty
     if not user_text and not uploaded_files:
         reply_message = "No data or files were sent for scanning."
 
     return jsonify({"reply": reply_message})
 
 
-# Standalone endpoints kept intact for fallback direct API calls
+# Direct endpoints
 @app.route('/predict_email', methods=['POST'])
 def email_route():
     data = request.get_json()
