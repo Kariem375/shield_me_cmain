@@ -1,6 +1,6 @@
 'use strict';
 
-const API_BASE_URL = (window.SHIELDME_API_URL || 'http://127.0.0.1:5000').replace(/\/$/, '');
+const API_BASE_URL = (window.SHIELDME_API_URL || 'https://flattered-darling-lapping.ngrok-free.dev').replace(/\/$/, '');
 const FRONTEND_ONLY_MODE = window.SHIELDME_FRONTEND_ONLY === true;
 let loaderInterval = null;
 
@@ -265,6 +265,9 @@ async function sendMessage(event) {
     try {
         const response = await fetch(`${API_BASE_URL}/scan`, {
             method: 'POST',
+            headers: {
+                'ngrok-skip-browser-warning': 'true',
+                },
             body: formData
         });
 
@@ -379,7 +382,7 @@ window.addEventListener('shield-auth-changed', () => {
     if ($('history')?.classList.contains('active')) renderHistory();
 });
 
-// Quiz
+// ── Quiz ──
 const allQuestions = [
     { q: 'ما هو التصيد الاحتيالي (Phishing)؟', options: ['محاولة سرقة بياناتك عبر رسائل مزيفة', 'تحديث نظام التشغيل', 'نوع من أنواع الشاشات'], correct: 0, explanation: 'التصيد الاحتيالي هو أسلوب هجوم يعتمد على رسائل مزيفة تنتحل صفة جهات موثوقة بهدف سرقة كلمات المرور أو البيانات البنكية.' },
     { q: 'أي من هذه الكلمات تعتبر كلمة مرور قوية؟', options: ['123456', 'password', 'A@7k9!pW2L'], correct: 2, explanation: 'كلمة المرور القوية تجمع بين أحرف كبيرة وصغيرة وأرقام ورموز، ولا تكون كلمة قاموسية أو تسلسلاً رقمياً سهل التخمين.' },
@@ -475,7 +478,7 @@ function finishQuiz() {
 }
 
 function toggleAuth() {
-    // التسجيل العادي تم إلغاؤه. الدخول متاح باستخدام Google فقط.
+     // Google-only auth
     if (window.showToast) window.showToast('التسجيل متاح باستخدام Google فقط.', 'info', 4000);
     showPage('login');
 }

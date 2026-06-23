@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
 import yara
 import joblib
 import os
@@ -7,7 +8,9 @@ import pandas as pd
 from predict import predict_email
 from url_predict import predict_url as url_predictor
 from chatbot import chat as gemini_chat
+import google.generativeai as genai
 import markdown
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  
@@ -21,7 +24,7 @@ except Exception as e:
     print(f"❌ Error loading YARA rules: {e}")
     rules = None
 
-# Threat descriptions
+ # Threat descriptions (Arabic)
 threat_descriptions = {
     "Test_Malware_Rule": "تم اكتشاف ملف اختبار. محرك الحماية يعمل بكفاءة.",
     "Suspicious_PDF_With_JS": "ملف PDF خبيث! يحتوي على أكواد جافا سكريبت مخفية للعمل تلقائياً.",
@@ -35,13 +38,13 @@ threat_descriptions = {
 
 # ML models
 try:
-    email_model = joblib.load(os.path.join(BASE_DIR, 'model (1).pkl'))
-    vectorizer = joblib.load(os.path.join(BASE_DIR, 'vectorizer (1).pkl'))
     url_model = joblib.load(os.path.join(BASE_DIR, 'url_model.pkl'))
     url_columns = joblib.load(os.path.join(BASE_DIR, 'url_columns.pkl'))
     print("✅ Machine Learning models loaded successfully!")
 except Exception as e:
     print(f"❌ Error loading ML models: {e}")
+
+
 
 @app.route('/scan', methods=['POST'])
 def scan():
@@ -109,13 +112,13 @@ def scan():
     elif uploaded_files and not rules:
         reply_message += "⚠️ Files received but YARA scanner engine is offline.<br>"
 
+    # Fallback if everything was empty
     if not user_text and not uploaded_files:
         reply_message = "No data or files were sent for scanning."
 
     return jsonify({"reply": reply_message})
 
 
-# Direct endpoints
 @app.route('/predict_email', methods=['POST'])
 def email_route():
     data = request.get_json()
@@ -123,7 +126,7 @@ def email_route():
     result = predict_email(text)
     return jsonify(result)
 
-
+# Direct endpoints
 @app.route('/predict_url', methods=['POST'])
 def url_route():
     data = request.get_json()
